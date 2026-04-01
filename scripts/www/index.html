@@ -1,88 +1,340 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="./static/css/styles.css" />
-        <meta
-            http-equiv="Content-Security-Policy"
-            content="default-src * 'unsafe-inline' 'unsafe-eval'"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Tauri App</title>
-        <script src="./static/js/main.js"></script>
-    </head>
-    <body>
-        <main class="container">
-            <h1>Welcome to TauriMan</h1>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽检计算器</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#3b82f6',
+                        accent: '#f97316',
+                        neutral: '#f3f4f6',
+                        'neutral-dark': '#9ca3af'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'bounce-light': 'bounce-light 0.5s ease-in-out'
+                    },
+                    keyframes: {
+                        'bounce-light': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg active:scale-95;
+            }
+            .card {
+                @apply bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg;
+            }
+            .result-card {
+                @apply bg-gradient-to-r from-primary/5 to-secondary/5 border-l-4 border-primary rounded-lg p-4 transition-all duration-300;
+            }
+            .history-item {
+                @apply flex justify-between items-center p-3 border-b border-neutral-dark/20 last:border-b-0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral min-h-screen font-sans text-gray-800">
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <!-- 应用标题 -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-primary mb-2">抽检计算器</h1>
+            <p class="text-neutral-dark text-sm">快速计算收料抽检数量</p>
+        </header>
 
-            <div class="row">
-                <a
-                    href="https://tauri.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
+        <!-- 主内容区 -->
+        <main>
+            <!-- 输入卡片 -->
+            <div class="card mb-6">
+                <div class="mb-4">
+                    <label for="packageCount" class="block text-sm font-medium text-gray-700 mb-1">收料总包件数 (n)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-dark">
+                            <i class="fa fa-cubes"></i>
+                        </span>
+                        <input 
+                            type="number" 
+                            id="packageCount" 
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg input-focus" 
+                            placeholder="请输入总包件数" 
+                            min="1"
+                            step="1"
+                        >
+                    </div>
+                </div>
+                
+                <button 
+                    id="calculateBtn" 
+                    class="btn-primary w-full flex items-center justify-center gap-2 disabled:bg-neutral-dark disabled:cursor-not-allowed"
+                    disabled
                 >
-                    <img
-                        src="./assets/tauri.svg"
-                        class="logo tauri"
-                        alt="Tauri logo"
-                    />
-                </a>
-                <a
-                    href="https://pakeplus.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <img
-                        src="https://hk.gh-proxy.org/https://github.com/Sjj1024/PakePlus/blob/main/app-icon.png"
-                        class="logo vanilla"
-                        alt="JavaScript logo"
-                    />
-                </a>
-            </div>
-            <p>Click to get data</p>
-            <form class="row" id="greet-form">
-                <input id="greet-input" placeholder="Enter a name..." />
-                <button type="submit" id="getdata">GET DATA</button>
-            </form>
-            <div class="functions">
-                <a href="./book.html" target="_self">跳转到book.html</a>
-                <a
-                    href="https://www.baidu.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >跳到百度blank
-                </a>
-                <a
-                    href="https://www.baidu.com"
-                    target="_self"
-                    rel="noopener noreferrer"
-                >
-                    跳到百度self
-                </a>
-                <button onclick="sayHello()">点击我</button>
-                <button onclick="sayHello()">下载文件</button>
-                <button onclick="sayHello()">上传文件</button>
-                <button onclick="sayHello()">访问相机</button>
-                <button onclick="sayHello()">访问麦克风</button>
-                <button onclick="sayHello()">访问相册</button>
-                <button class="btn" onclick="openWechat()">打开微信</button>
-                <button class="btn" onclick="openWechatScan()">
-                    打开扫一扫
+                    <i class="fa fa-calculator"></i>
+                    <span>计算抽检数量</span>
                 </button>
-                <button class="btn" onclick="openZhihu()">打开知乎</button>
-                <button onclick="sayHello()">打开抖音</button>
-                <button onclick="sayHello()">用浏览器打开</button>
-                <button>打开知乎</button>
             </div>
-            <p id="greet-msg"></p>
-            <img src="./static/image/cursor.jpeg" alt="logo" />
-            <video
-                src="https://hk.gh-proxy.org/https://github.com/Sjj1024/PakePlus/blob/main/docs/static/videos/pakeplus.mp4"
-                autoplay
-                controls
-                style="width: 100%; height: 100%"
-            ></video>
-            <audio src="./static/music/yin.mp3" controls></audio>
+
+            <!-- 规则说明卡片 -->
+            <div class="card mb-6">
+                <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <i class="fa fa-info-circle text-primary"></i>
+                    抽检规则说明
+                </h2>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start gap-2">
+                        <span class="bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">规则1</span>
+                        <span>当 n ≤ 3 时，逐件抽检</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">规则2</span>
+                        <span>当 3 &lt; n ≤ 300 时，按 √n + 1 抽检</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">规则3</span>
+                        <span>当 n &gt; 300 时，按 √n/2 + 1 抽检</span>
+                    </li>
+                    <li class="text-neutral-dark italic mt-2">注：若非整数，则进位成整数</li>
+                </ul>
+            </div>
+
+            <!-- 结果显示区域 -->
+            <div id="resultSection" class="hidden mb-6">
+                <div class="result-card">
+                    <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <i class="fa fa-check-circle text-primary"></i>
+                        计算结果
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-neutral-dark">总包件数</p>
+                            <p id="inputValue" class="text-xl font-semibold">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-neutral-dark">抽检件数</p>
+                            <p id="inspectionCount" class="text-xl font-bold text-accent">-</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <p class="text-sm">
+                            <span class="text-neutral-dark">应用规则：</span>
+                            <span id="appliedRule" class="font-medium">-</span>
+                        </p>
+                        <p id="calculationDetail" class="text-sm text-neutral-dark mt-1">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录区域 -->
+            <div id="historySection" class="hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        <i class="fa fa-history text-primary"></i>
+                        历史记录
+                    </h2>
+                    <button id="clearHistoryBtn" class="text-sm text-neutral-dark hover:text-red-500 transition-colors">
+                        <i class="fa fa-trash-o"></i> 清空
+                    </button>
+                </div>
+                <div id="historyList" class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <!-- 历史记录将在这里动态添加 -->
+                </div>
+            </div>
         </main>
-    </body>
+
+        <!-- 底部信息 -->
+        <footer class="text-center text-xs text-neutral-dark mt-12">
+            <p>© 2025 抽检计算器 v1.1</p>
+        </footer>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const packageCountInput = document.getElementById('packageCount');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultSection = document.getElementById('resultSection');
+        const inputValueElement = document.getElementById('inputValue');
+        const inspectionCountElement = document.getElementById('inspectionCount');
+        const appliedRuleElement = document.getElementById('appliedRule');
+        const calculationDetailElement = document.getElementById('calculationDetail');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+        // 检查输入是否有效
+        packageCountInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            calculateBtn.disabled = !value || isNaN(value) || parseFloat(value) <= 0;
+            
+            // 如果输入有效，添加动画效果
+            if (!calculateBtn.disabled) {
+                calculateBtn.classList.add('animate-bounce-light');
+                setTimeout(() => {
+                    calculateBtn.classList.remove('animate-bounce-light');
+                }, 500);
+            }
+        });
+
+        // 计算按钮点击事件
+        calculateBtn.addEventListener('click', function() {
+            const n = parseFloat(packageCountInput.value);
+            
+            // 计算抽检数量
+            const result = calculateInspectionCount(n);
+            
+            // 显示结果
+            showResult(n, result);
+            
+            // 保存到历史记录
+            saveToHistory(n, result);
+            
+            // 震动反馈（如果设备支持）
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+            
+            // 清空输入框
+            packageCountInput.value = '';
+            calculateBtn.disabled = true;
+        });
+
+        // 清空历史记录按钮点击事件
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem('inspectionHistory');
+                updateHistoryDisplay();
+            }
+        });
+
+        // 计算抽检数量的函数
+        function calculateInspectionCount(n) {
+            let count, rule, detail;
+            
+            if (n <= 3) {
+                // 规则1：逐件抽检
+                count = n;
+                rule = '规则1：当 n ≤ 3 时，逐件抽检';
+                detail = `${n} 件（逐件抽检）`;
+            } else if (n <= 300) {
+                // 规则2：√n + 1
+                const sqrtResult = Math.sqrt(n);
+                count = Math.ceil(sqrtResult + 1);
+                rule = '规则2：当 3 < n ≤ 300 时，按 √n + 1 抽检';
+                detail = `√${n} ≈ ${sqrtResult.toFixed(2)}，${sqrtResult.toFixed(2)} + 1 = ${(sqrtResult + 1).toFixed(2)}，进位为 ${count} 件`;
+            } else {
+                // 规则3：√n/2 + 1
+                const sqrtResult = Math.sqrt(n);
+                const halfResult = sqrtResult / 2;
+                count = Math.ceil(halfResult + 1);
+                rule = '规则3：当 n > 300 时，按 √n/2 + 1 抽检';
+                detail = `√${n} ≈ ${sqrtResult.toFixed(2)}，${sqrtResult.toFixed(2)}/2 = ${halfResult.toFixed(2)}，${halfResult.toFixed(2)} + 1 = ${(halfResult + 1).toFixed(2)}，进位为 ${count} 件`;
+            }
+            
+            return { count, rule, detail };
+        }
+
+        // 显示结果的函数
+        function showResult(n, result) {
+            inputValueElement.textContent = n;
+            inspectionCountElement.textContent = result.count;
+            appliedRuleElement.textContent = result.rule;
+            calculationDetailElement.textContent = result.detail;
+            
+            // 显示结果区域
+            resultSection.classList.remove('hidden');
+            
+            // 滚动到结果区域
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 保存到历史记录的函数
+        function saveToHistory(n, result) {
+            // 获取现有历史记录
+            let history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]');
+            
+            // 添加新记录
+            history.unshift({
+                id: Date.now(),
+                input: n,
+                result: result.count,
+                rule: result.rule,
+                timestamp: new Date().toLocaleString('zh-CN')
+            });
+            
+            // 限制历史记录数量（最多保存10条）
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
+            
+            // 保存回localStorage
+            localStorage.setItem('inspectionHistory', JSON.stringify(history));
+            
+            // 更新历史记录显示
+            updateHistoryDisplay();
+        }
+
+        // 更新历史记录显示的函数
+        function updateHistoryDisplay() {
+            // 获取历史记录
+            const history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]');
+            
+            if (history.length > 0) {
+                // 显示历史记录区域
+                historySection.classList.remove('hidden');
+                
+                // 清空历史记录列表
+                historyList.innerHTML = '';
+                
+                // 添加历史记录项
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div>
+                            <div class="font-medium">${item.input} 件</div>
+                            <div class="text-xs text-neutral-dark">${item.timestamp}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-accent">${item.result} 件</div>
+                            <div class="text-xs text-neutral-dark">抽检</div>
+                        </div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+            } else {
+                // 隐藏历史记录区域
+                historySection.classList.add('hidden');
+            }
+        }
+
+        // 页面加载时更新历史记录显示
+        updateHistoryDisplay();
+
+        // 为输入框添加回车键监听
+        packageCountInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !calculateBtn.disabled) {
+                calculateBtn.click();
+            }
+        });
+    </script>
+</body>
 </html>
